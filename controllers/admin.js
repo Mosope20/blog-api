@@ -26,7 +26,6 @@ export const newAdmin = async (req,res)=>{
         const admin = {id:uuid4(), username:username, email:email, password:hashedPassword}
         admins.push(admin);
         res.status(201).send('Account Created!');
-        console.log(admins)
     }
     catch(err){
         res.status(500).send('Error Creating Account!');
@@ -39,7 +38,7 @@ export const adminLogin = async(req,res)=>{
     const {email,username,password} = req.body;
     if((!email || !username) && !password){return res.status(500).send("Email/Username and password required");}
 
-    const currentUser = admins.find((user=>user.email === email));
+    const currentUser = admins.find(user=>user.email === email);
     //console.log(currentUser);
     if(!email){return res.status(500).send("Incorrect Username");}
     try{
@@ -58,11 +57,41 @@ export const adminLogin = async(req,res)=>{
     }
 }
 
-export const creatPost = (req,res)=>{
+export const createPost = async(req,res)=>{
     const{content} = req.body;
     if(!content){return res.status(500).send("content cannot be empty");}
-
-    const blogContent = {postId:uuid4(), content:content}
+    
+    try{
+    const blogContent = {postId:uuid4(), content:content};
      
     blogPosts.push(blogContent);
+    console.log(blogPosts);
+    res.status(201).send(blogContent);
+    }
+    catch(error){
+        res.status(500).send('Something went wrong');
+    }
+}
+
+export const deletePost = async(req,res)=>{
+    const{postId} = req.body;
+     
+    try{
+        const postIndex = blogPosts.findIndex(post => post.postId === postId);
+
+        if (postIndex === -1) {
+            return res.status(404).send('Post not found');
+        }
+
+        // Remove the post from the array
+        blogPosts.splice(postIndex, 1);
+
+        console.log(blogPosts); // For debugging
+
+        res.status(200).send('Post successfully deleted');
+    }
+
+        catch(error){
+            res.status(500).send('Something went wrong');
+        }
 }

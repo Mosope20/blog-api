@@ -1,6 +1,6 @@
 import express from 'express';
 import { newUser, userLogin, newComment, deleteComment,viewAllPosts } from '../controllers/users.js';
-import {newAdmin,adminLogin,creatPost} from '../controllers/admin.js';
+import {newAdmin,adminLogin,createPost, deletePost} from '../controllers/admin.js';
 
 
 const router = express.Router();
@@ -15,7 +15,7 @@ router.post('/login',userLogin);
 
 router.post('/comment', newComment);
 
-router.post('/delete_comment', deleteComment);
+router.post('/deleteComment', deleteComment);
 
 router.get('/posts', viewAllPosts);
 
@@ -25,6 +25,8 @@ router.post('/admin/signup',newAdmin);
 
 router.post('/admin/login',adminLogin);
 
-router.post('/admin/post_content',creatPost);
+router.post('/admin/postContent',createPost);
+
+router.delete('/admin/deletePost', deletePost);
 
 export default router;

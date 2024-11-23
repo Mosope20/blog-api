@@ -96,9 +96,12 @@ export const deleteComment = async(req,res)=>{
 
 }
 
-
+//all posts
 export const viewAllPosts = (req,res)=>{
-    array.forEach(blogPosts => {
-        res.json(blogPosts.cotent);
-    });
+    if (blogPosts.length === 0) {
+        return res.status(404).json({ message: 'No posts found' });
+    }
+
+    const allPosts = blogPosts.map(blogPost => blogPost.content);
+    res.status(200).json(allPosts);
 }

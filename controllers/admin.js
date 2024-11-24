@@ -62,7 +62,7 @@ export const createPost = async(req,res)=>{
     if(!content){return res.status(500).send("content cannot be empty");}
     
     try{
-    const blogContent = {postId:uuid4(), content:content};
+    const blogContent = {postId:uuid4(), content:content, comments: {}};
      
     blogPosts.push(blogContent);
     console.log(blogPosts);

@@ -6,8 +6,8 @@ import'dotenv/config';
 const saltRounds = 10;
 
 import { blogPosts } from './admin.js';
-const users = [];
-const AllUserComments = [];
+const users = [{}];
+//const AllUserComments = [];
 
 export const blacklistedTokens = [];
 
@@ -61,21 +61,34 @@ export const userLogin = async(req,res)=>{
 
 
 export const newComment = async(req,res)=>{
-    const {comment,postId} = req.body;
+    const {comment,postId,id} = req.body;
     if(!comment){return res.status(500).send("You cannot send an empty comment");}
 
-    const existingUser = users.find(user=> user.username === username);
+    const existingUser = users.find(user=> user.id === id);
+    const currentPost = blogPosts.find(post=> post.postId === postId);
 
     try{
-        const blogPost = {postId:postId,comments:{comment:AllUserComments.userComment,username:AllUserComments.userName}}
-        blogPosts.push(blogPost);
+        
+        const comment = {comment: comment,userId:existingUser.id,username:existingUser.username};
+
+        if (!blogPost.comments[userId]) {
+            blogPost.comments[userId] = [];
+        }
+
+        currentPost.comments[postId].push(comment);
+        
+        res.status(201).send('comment successful');
+        
+        
+        // const comment = {postId:postId,comments:{comment:AllUserComments.userComment,username:AllUserComments.userName}}
+        // blogPosts.push(blogPost);
         
 
-        const userComment = {postId:postId,comment:comment,userDetails:{
-            userId:existingUser.id, userName:existingUser.username
-        }}
+        // const userComment = {postId:postId,comment:comment,userDetails:{
+        //     userId:existingUser.id, userName:existingUser.username
+        // }}
 
-        AllUserComments.push(userComment);
+        // AllUserComments.push(userComment);
     }
     catch(error){
         res.status(500).send('Could not post comment');

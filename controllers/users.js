@@ -6,7 +6,7 @@ import'dotenv/config';
 const saltRounds = 10;
 
 import { blogPosts } from './admin.js';
-const users = [{}];
+const users = [];
 //const AllUserComments = [];
 
 export const blacklistedTokens = [];

@@ -1,4 +1,3 @@
-import express from 'express';
 import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';

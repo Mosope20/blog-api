@@ -9,6 +9,8 @@ router.get('/',(req,res)=>{
     res.send('Hello from express');
 })
 
+//users
+
 router.post('/signup',newUser);
 
 router.post('/login',userLogin);

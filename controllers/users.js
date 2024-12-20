@@ -3,6 +3,7 @@ import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import'dotenv/config';
+import { checkIfUserUsernameExists, checkIfUserEmailExists, insertNewUserIntoDb, getUserFromDb} from '../database/database_query.js';
 const saltRounds = 10;
 
 import { blogPosts } from './admin.js';
@@ -17,21 +18,25 @@ export const newUser = async (req,res)=>{
     const {username,email,password} = req.body;
     if((!username && !password) && !email){return res.status(500).send("Username, email and password are required! ")};
 
-    const existingUsername = users.find(user=> user.username === username);
+    console.log(checkIfUserUsernameExists(username));
+    const existingUsername = await checkIfUserUsernameExists(username);
     if(existingUsername){return res.status(400).send('Username already exists')};
 
-    const existingEmail = users.find(user=> user.email === email);
+    console.log(checkIfUserUsernameExists(email));
+    const existingEmail = await checkIfUserEmailExists(email);
     if(existingEmail){return res.status(400).send('Email already exists')};
 
     try{
         const hashedPassword = await bcrypt.hash(password,saltRounds);
-        const user = {id:uuid4(), username:username, email:email, password:hashedPassword, banned: false}
-        users.push(user);
-        res.status(201).send('Account Created!');
-        console.log(users)
+        const user = {id:uuid4(), username:username, email:email, password:hashedPassword, banned: false};
+        const result = await insertNewUserIntoDb(user);
+        if(result){return res.status(201).send(`Account with username ${user.username} successfully created`)};
+        // users.push(user);
+        // res.status(201).send('Account Created!');
+        // console.log(users)
     }
     catch(err){
-        res.status(500).send('Error Creating Account!');
+        res.status(500).send('Error Creating Account!. Try Again Later.');
     }
 }
 
@@ -39,9 +44,9 @@ export const userLogin = async(req,res)=>{
 
     const {email,username,password} = req.body;
     if((!email || !username) && !password){return res.status(500).send("Email/Username and password required");}
-
-    const currentUser = users.find((user=>user.username === username)||(user=>user.email === email));
-    if(!email || !username){return res.status(500).send("Incorrect Username");}
+    const currentUser = getUserFromDb(email);
+    //const currentUser = users.find((user=>user.username === username)||(user=>user.email === email));
+    if(currentUser.banned == true || 1){return res.status(500).send("Your Account Has been banned");}
     try{
         const isMatch = await bcrypt.compare(password,currentUser.password);
 
@@ -87,7 +92,7 @@ export const newComment = async(req,res)=>{
         // const userComment = {postId:postId,comment:comment,userDetails:{
         //     userId:existingUser.id, userName:existingUser.username
         // }}
-
+        2
         // AllUserComments.push(userComment);
     }
     catch(error){

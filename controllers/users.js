@@ -3,8 +3,9 @@ import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import'dotenv/config';
-import { checkIfUserUsernameExists, checkIfUserEmailExists, insertNewUserIntoDb, getUserFromDb} from '../database/database_query.js';
+import { checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb} from '../database/database_query.js';
 const saltRounds = 10;
+import 'dotenv/config';
 
 import { blogPosts } from './admin.js';
 const users = [];
@@ -17,16 +18,19 @@ export const newUser = async (req,res)=>{
 
     const {username,email,password} = req.body;
     if((!username && !password) && !email){return res.status(500).send("Username, email and password are required! ")};
-
-    console.log(checkIfUserUsernameExists(username));
-    const existingUsername = await checkIfUserUsernameExists(username);
-    if(existingUsername){return res.status(400).send('Username already exists')};
-
-    console.log(checkIfUserUsernameExists(email));
-    const existingEmail = await checkIfUserEmailExists(email);
-    if(existingEmail){return res.status(400).send('Email already exists')};
+    console.log(checkIfUserEmailAndUsernameExists(email,username));
 
     try{
+        const { emailExists, usernameExists } = await checkIfUserEmailAndUsernameExists(email, username);
+
+        if (emailExists && usernameExists) {
+            return res.status(400).send('Email and Username already exist');
+        } else if (emailExists) {
+            return res.status(400).send('Email already exists');
+        } else if (usernameExists) {
+            return res.status(400).send('Username already exists');
+        }
+
         const hashedPassword = await bcrypt.hash(password,saltRounds);
         const user = {id:uuid4(), username:username, email:email, password:hashedPassword, banned: false};
         const result = await insertNewUserIntoDb(user);
@@ -44,15 +48,17 @@ export const userLogin = async(req,res)=>{
 
     const {email,username,password} = req.body;
     if((!email || !username) && !password){return res.status(500).send("Email/Username and password required");}
-    const currentUser = getUserFromDb(email);
-    //const currentUser = users.find((user=>user.username === username)||(user=>user.email === email));
-    if(currentUser.banned == true || 1){return res.status(500).send("Your Account Has been banned");}
+    
     try{
-        const isMatch = await bcrypt.compare(password,currentUser.password);
+        const currentUser = await getUserFromDb(email, username);
+        console.log(currentUser[0].banned);
+        //const currentUser = users.find((user=>user.username === username)||(user=>user.email === email));
+        if(currentUser[0].banned == 1){return res.status(500).send("Your Account Has been banned");}
+        const isMatch = await bcrypt.compare(password,currentUser[0].password);
 
         if(isMatch){
-            const accessToken = jwt.sign({id:currentUser.id,username:currentUser.username},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h'  });
-        res.json({message: `Welcome ${currentUser.username}`,
+            const accessToken = jwt.sign({id:currentUser[0].id,username:currentUser[0].username},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h'  });
+        res.json({message: `Welcome ${currentUser[0].username}`,
         accessToken});
             }
             else{res.status(401).send('Incorrect password');}

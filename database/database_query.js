@@ -3,7 +3,7 @@ import 'dotenv/config';
 
 const pool = createPool({
     host: process.env.HOST,
-    user: process.env.USER,
+    user: process.env.DB_USER,
     password: process.env.PASSWORD,
     database: process.env.DATABASE,
     connectionLimit: process.env.CONNECTIONLIMIT
@@ -18,36 +18,21 @@ const pool = createPool({
 //   });
 
 
-export function checkIfUserUsernameExists(username){
+export function checkIfUserEmailAndUsernameExists(email, username){
     const checkQuery = `
-    SELECT * FROM users WHERE username = (?);
+    SELECT * FROM users WHERE email = (?) OR username = (?);
     `;
     return new Promise((resolve, reject) => {
-        pool.query(checkQuery, [username], (err, results) => {
+        pool.query(checkQuery, [email, username], (err, results) => {
             if (err) {
                 console.error("Error getting Username:", err);
                 return reject(err); // Reject the Promise on error
             }
-            const exists = results.length > 0;
-            console.log("Username exists:", exists);
-            resolve(exists); // Resolve with true or false
-        });
-    });
-}
+            // Determine existence of email and username
+            const emailExists = results.some((row) => row.email === email);
+            const usernameExists = results.some((row) => row.username === username);
 
-export function checkIfUserEmailExists(email){
-    const checkQuery = `
-    SELECT * FROM users WHERE email = (?);
-    `;
-    return new Promise((resolve, reject) => {
-        pool.query(checkQuery, [email], (err, results) => {
-            if (err) {
-                console.error("Error getting Username:", err);
-                return reject(err); // Reject the Promise on error
-            }
-            const exists = results.length > 0;
-            console.log("Username exists:", exists);
-            resolve(exists); // Resolve with true or false
+            resolve({ emailExists, usernameExists });
         });
     });
 }
@@ -70,20 +55,20 @@ export function insertNewUserIntoDb(user){
     });
 }
 
-export function getUserFromDb(email){
+export function getUserFromDb(email, username){
     const getQuery = `
     SELECT * FROM users
-    WHERE email = (?);
+    WHERE email = (?) OR username = (?);
     `;
     return new Promise((resolve, reject)=>{
-        pool.query(getQuery,email, (err,results)=>{
+        pool.query(getQuery,[email,username], (err,results)=>{
             if(err){
                 console.error("Error getting user", err);
                 return reject(err); //Reject the Promise on error
             }
 
             console.log("user retrived successfully:", results);
-            resolve(results); //Resolve the Promise wirh results
+            resolve(results); //Resolve the Promise with results
         });
     });
 }

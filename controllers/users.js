@@ -58,8 +58,14 @@ export const userLogin = async(req,res)=>{
 
         if(isMatch){
             const accessToken = jwt.sign({id:currentUser[0].id,username:currentUser[0].username},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h'  });
-        res.json({message: `Welcome ${currentUser[0].username}`,
-        accessToken});
+            res.cookie('auth_token', accessToken, {
+                httpOnly: true, // Prevent JavaScript from accessing the cookie
+                secure: true,   // Ensures the cookie is sent only over HTTPS (set true in production)
+                sameSite: 'Strict', // Prevents CSRF (use 'Lax' if requests come from other domains)
+                maxAge: 3600000, // Cookie expiration in milliseconds (1 hour)
+            });
+            
+            res.json({ message: `Welcome ${currentUser[0].username}` });
             }
             else{res.status(401).send('Incorrect password');}
     }

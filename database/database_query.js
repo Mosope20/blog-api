@@ -88,3 +88,22 @@ export function insertUserCommentsIntoDb(comment){
         });
     });
 }
+
+export function deleteUserCommentFromDb(commentId, postId, userId){
+    const deleteQuery = `DELETE FROM user_comments WHERE commentId = (?) AND postId = (?) AND userId = (?)`;
+
+    return new Promise((resolve,reject)=>{
+        pool.query(deleteQuery,[commentId, postId, userId], (err,results)=>{
+            if(err){
+                console.error("Error deleting user comments", err);
+                return reject(err);
+            }
+            console.log("user comment deleted successfully:", results);
+            resolve(results);
+        });
+    });
+}
+
+export function viewAllBlogPost(){
+    
+}

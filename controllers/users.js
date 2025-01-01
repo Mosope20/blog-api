@@ -3,7 +3,7 @@ import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import'dotenv/config';
-import { checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb, insertUserCommentsIntoDb} from '../database/database_query.js';
+import { checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb, insertUserCommentsIntoDb, deleteUserCommentFromDb} from '../database/database_query.js';
 const saltRounds = 10;
 import 'dotenv/config';
 
@@ -102,12 +102,15 @@ export const newComment = async(req,res)=>{
 }
 
 export const deleteComment = async(req,res)=>{
-    const{postId} =req.body;
-    const existingUser = users.find(user=> user.username === username);
+    const{postId, commentId} = req.body;
+    
+    const{username,email,userId} = req.user;
     try{
-        if(comment.userDetails.userId === existingUser.id)
-        {const commentToDDelete = AllUserComments.find(comment => (comment.postId === postId && comment.userDetails.userId));}
-        AllUserComments.pop(commentToDDelete);
+        const currentUser = await getUserFromDb(email, username);
+        if(currentUser[0].banned == 1){return res.status(500).send("Your Account Has been banned");}
+
+       const result = await deleteUserCommentFromDb(commentId, postId, userId);
+       if(result){res.status(201).send('deleted successfully')};
     }
     catch(error){
 

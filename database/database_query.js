@@ -49,7 +49,7 @@ export function insertNewUserIntoDb(user){
                 console.error("Error inserting into users:", err);
                 return reject(err); //Reject the Promise on error
             }
-            console.log("Seminar added successfully:", results);
+            console.log("User added successfully:", results);
             resolve(results); // Resolve the Promise on success
         });
     });
@@ -68,6 +68,22 @@ export function getUserFromDb(email, username){
             }
 
             console.log("user retrived successfully:", results);
+            resolve(results); //Resolve the Promise with results
+        });
+    });
+}
+
+export function insertUserCommentsIntoDb(comment){
+    const insertQuery = `INSERT INTO user_comments(commentId,userId,postId,comment,username)
+    VALUES (?, ?, ?, ?, ?);`;
+
+    return new Promise((resolve,reject)=>{
+        pool.query(insertQuery,[comment.commentId, comment.userId, comment.postId, comment.comment, comment.username],(err,results)=>{
+            if(err){
+                console.error("Error inserting into user_comments:", err);
+                return reject(err); //Reject the Promise on error
+            }
+            console.log("user comment uploaded successfully:", results);
             resolve(results); //Resolve the Promise with results
         });
     });

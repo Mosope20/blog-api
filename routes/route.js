@@ -1,6 +1,7 @@
 import express from 'express';
 import { newUser, userLogin, newComment, deleteComment,viewAllPosts } from '../controllers/users.js';
 import {newAdmin,adminLogin,createPost, deletePost} from '../controllers/admin.js';
+import { authenticateToken } from '../middlewares/authmiddleware.js';
 
 
 const router = express.Router();
@@ -15,11 +16,11 @@ router.post('/signup',newUser);
 
 router.post('/login',userLogin);
 
-router.post('/comment', newComment);
+router.post('/comment',authenticateToken, newComment);
 
-router.post('/deleteComment', deleteComment);
+router.post('/deleteComment',authenticateToken, deleteComment);
 
-router.get('/posts', viewAllPosts);
+router.get('/posts',authenticateToken, viewAllPosts);
 
 //admin
 

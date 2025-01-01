@@ -3,7 +3,7 @@ import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import'dotenv/config';
-import { checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb} from '../database/database_query.js';
+import { checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb, insertUserCommentsIntoDb} from '../database/database_query.js';
 const saltRounds = 10;
 import 'dotenv/config';
 
@@ -11,7 +11,9 @@ import { blogPosts } from './admin.js';
 const users = [];
 //const AllUserComments = [];
 
-export const blacklistedTokens = [];
+// const liveUser = [];
+
+// export const blacklistedTokens = [];
 
 
 export const newUser = async (req,res)=>{
@@ -34,7 +36,7 @@ export const newUser = async (req,res)=>{
         const hashedPassword = await bcrypt.hash(password,saltRounds);
         const user = {id:uuid4(), username:username, email:email, password:hashedPassword, banned: false};
         const result = await insertNewUserIntoDb(user);
-        if(result){return res.status(201).send(`Account with username ${user.username} successfully created`)};
+        if(result){return res.status(201).send(`Account with username ${user.username} successfully created`).redirect('/login')};
         // users.push(user);
         // res.status(201).send('Account Created!');
         // console.log(users)
@@ -52,15 +54,16 @@ export const userLogin = async(req,res)=>{
     try{
         const currentUser = await getUserFromDb(email, username);
         console.log(currentUser[0].banned);
+        console.log(currentUser[0].userId);
         //const currentUser = users.find((user=>user.username === username)||(user=>user.email === email));
         if(currentUser[0].banned == 1){return res.status(500).send("Your Account Has been banned");}
         const isMatch = await bcrypt.compare(password,currentUser[0].password);
 
         if(isMatch){
-            const accessToken = jwt.sign({id:currentUser[0].id,username:currentUser[0].username},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h'  });
+            const accessToken = await jwt.sign({userId:currentUser[0].userId,username:currentUser[0].username, email: currentUser[0].email},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h'  });
             res.cookie('auth_token', accessToken, {
                 httpOnly: true, // Prevent JavaScript from accessing the cookie
-                secure: true,   // Ensures the cookie is sent only over HTTPS (set true in production)
+                secure: false,   // Ensures the cookie is sent only over HTTPS (set true in production)
                 sameSite: 'Strict', // Prevents CSRF (use 'Lax' if requests come from other domains)
                 maxAge: 3600000, // Cookie expiration in milliseconds (1 hour)
             });
@@ -78,36 +81,22 @@ export const userLogin = async(req,res)=>{
 
 
 export const newComment = async(req,res)=>{
-    const {comment,postId,id} = req.body;
+    const {comment,postId} = req.body;
     if(!comment){return res.status(500).send("You cannot send an empty comment");}
 
-    const existingUser = users.find(user=> user.id === id);
-    const currentPost = blogPosts.find(post=> post.postId === postId);
-
+    const{username,userId} = req.user;
     try{
         
-        const comment = {comment: comment,userId:existingUser.id,username:existingUser.username};
+        const userComment = {commentId:uuid4(),comment:comment,userId:userId,username:username, postId:postId};
 
-        if (!blogPost.comments[userId]) {
-            blogPost.comments[userId] = [];
-        }
+        const result = await insertUserCommentsIntoDb(userComment);
 
-        currentPost.comments[postId].push(comment);
         
-        res.status(201).send('comment successful');
+        if(result){res.status(201).send('comment successful');}
         
-        
-        // const comment = {postId:postId,comments:{comment:AllUserComments.userComment,username:AllUserComments.userName}}
-        // blogPosts.push(blogPost);
-        
-
-        // const userComment = {postId:postId,comment:comment,userDetails:{
-        //     userId:existingUser.id, userName:existingUser.username
-        // }}
-        2
-        // AllUserComments.push(userComment);
     }
     catch(error){
+        console.error('Error in comment process:',error)
         res.status(500).send('Could not post comment');
     }
 }

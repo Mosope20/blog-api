@@ -20,7 +20,7 @@ router.post('/comment',authenticateToken, newComment);
 
 router.post('/deleteComment',authenticateToken, deleteComment);
 
-router.get('/posts',authenticateToken, viewAllPosts);
+router.get('/posts', viewAllPosts);
 
 //admin
 

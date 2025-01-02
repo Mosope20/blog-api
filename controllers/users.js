@@ -3,7 +3,7 @@ import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import'dotenv/config';
-import { checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb, insertUserCommentsIntoDb, deleteUserCommentFromDb} from '../database/database_query.js';
+import { viewAllBlogPosts,checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb, insertUserCommentsIntoDb, deleteUserCommentFromDb} from '../database/database_query.js';
 const saltRounds = 10;
 import 'dotenv/config';
 
@@ -113,17 +113,20 @@ export const deleteComment = async(req,res)=>{
        if(result){res.status(201).send('deleted successfully')};
     }
     catch(error){
-
+        console.error('Error in deleting comment process:',error)
+        res.status(500).send('Could not delete comment');
     }
 
 }
 
 //all posts
-export const viewAllPosts = (req,res)=>{
-    if (blogPosts.length === 0) {
-        return res.status(404).json({ message: 'No posts found' });
+export const viewAllPosts = async(req,res)=>{
+    try{
+   const allPosts = await viewAllBlogPosts();
+   res.status(200).json(allPosts);
     }
-
-    const allPosts = blogPosts.map(blogPost => blogPost.content);
-    res.status(200).json(allPosts);
+   catch(error){
+    console.error('Error fetching blog posts:',error)
+        res.status(500).send('Could not get blog posts');
+   }
 }

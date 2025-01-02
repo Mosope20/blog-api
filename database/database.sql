@@ -13,3 +13,9 @@ CREATE TABLE `blog_db`.`user_comments` (
   `comment` VARCHAR(225) NOT NULL,
   `username` VARCHAR(125) NOT NULL,
   PRIMARY KEY (`commentId`));
+
+  CREATE TABLE `blog_db`.`blog_posts` (
+  `postId` VARCHAR(125) NOT NULL,
+  `content` VARCHAR(500) NOT NULL,
+  `adminId` VARCHAR(125) NOT NULL,
+  PRIMARY KEY (`postId`));

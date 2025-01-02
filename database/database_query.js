@@ -8,14 +8,21 @@ const pool = createPool({
     database: process.env.DATABASE,
     connectionLimit: process.env.CONNECTIONLIMIT
 })
-//work
-// pool.connect((err) => {
-//     if (err) {
-//       console.error('Error connecting to MySQL:', err);
-//       return;
-//     }
-//     console.log('Connected to MySQL!');
-//   });
+
+export function viewAllBlogPost(){
+    const viewQuery =`
+    SELECT * FROM blog_posts INNER JOIN user_comments ON blog_posts.postId = user_comments.postId
+    `;
+    return new Promise((resolve,reject)=>{
+        pool.query(viewQuery,(results,err)=>{
+            if(err){console.log("error getting blog posts", err);
+            return reject(err)
+        }
+        console.log("post gotten successfully:", results);
+        resolve(results); // Resolve the Promise on success
+        });
+    });
+}
 
 
 export function checkIfUserEmailAndUsernameExists(email, username){

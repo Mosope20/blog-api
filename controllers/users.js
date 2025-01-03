@@ -122,7 +122,9 @@ export const deleteComment = async(req,res)=>{
 //all posts
 export const viewAllPosts = async(req,res)=>{
     try{
+
    const allPosts = await viewAllBlogPosts();
+   console.log(allPosts)
    res.status(200).json(allPosts);
     }
    catch(error){

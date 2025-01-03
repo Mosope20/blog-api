@@ -9,12 +9,12 @@ const pool = createPool({
     connectionLimit: process.env.CONNECTIONLIMIT
 })
 
-export function viewAllBlogPost(){
+export function viewAllBlogPosts(){
     const viewQuery =`
-    SELECT * FROM blog_posts INNER JOIN user_comments ON blog_posts.postId = user_comments.postId
+    SELECT * FROM blog_posts INNER JOIN user_comments ON blog_posts.postId = user_comments.postId;
     `;
     return new Promise((resolve,reject)=>{
-        pool.query(viewQuery,(results,err)=>{
+        pool.query(viewQuery,(err, results)=>{
             if(err){console.log("error getting blog posts", err);
             return reject(err)
         }
@@ -111,6 +111,3 @@ export function deleteUserCommentFromDb(commentId, postId, userId){
     });
 }
 
-export function viewAllBlogPost(){
-    
-}

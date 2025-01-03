@@ -120,15 +120,46 @@ export const deleteComment = async(req,res)=>{
 }
 
 //all posts
-export const viewAllPosts = async(req,res)=>{
-    try{
+export const viewAllPosts = async (req, res) => {
+    try {
 
-   const allPosts = await viewAllBlogPosts();
-   console.log(allPosts)
-   res.status(200).json(allPosts);
-    }
-   catch(error){
-    console.error('Error fetching blog posts:',error)
+        // Fetch all posts with comments
+        const allPosts = await viewAllBlogPosts();
+
+        // Group comments under their respective posts
+        const postMap = new Map();
+
+        allPosts.forEach(entry => {
+            const { postId, content, adminId, commentId, userId, comment, username } = entry;
+
+            if (!postMap.has(postId)) {
+                // Create a new post object if it doesn't exist in the map
+                postMap.set(postId, {
+                    postId,
+                    content,
+                    adminId,
+                    comments: []
+                });
+            }
+
+            // Add the comment to the corresponding post
+            postMap.get(postId).comments.push({
+                commentId,
+                userId,
+                comment,
+                username
+            });
+        });
+
+        // Convert the map to an array
+        const optimizedPosts = Array.from(postMap.values());
+
+        console.log('Optimized Posts:', optimizedPosts);
+
+        // Send the optimized posts in the response
+        res.status(200).json(optimizedPosts);
+    } catch (error) {
+        console.error('Error fetching blog posts:', error);
         res.status(500).send('Could not get blog posts');
-   }
-}
+    }
+};

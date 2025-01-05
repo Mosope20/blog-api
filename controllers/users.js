@@ -1,4 +1,4 @@
-import express from 'express';
+
 import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -7,8 +7,7 @@ import { viewAllBlogPosts,checkIfUserEmailAndUsernameExists, insertNewUserIntoDb
 const saltRounds = 10;
 import 'dotenv/config';
 
-import { blogPosts } from './admin.js';
-const users = [];
+
 //const AllUserComments = [];
 
 // const liveUser = [];
@@ -163,3 +162,8 @@ export const viewAllPosts = async (req, res) => {
         res.status(500).send('Could not get blog posts');
     }
 };
+
+export const updateUser = async (req, res) => {
+    const {newUsername} = req.body;
+    if(!newUsername){return res.status(500).send("Cannot work with an empty field")};
+}

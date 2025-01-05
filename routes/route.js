@@ -1,5 +1,5 @@
 import express from 'express';
-import { newUser, userLogin, newComment, deleteComment,viewAllPosts } from '../controllers/users.js';
+import { newUser, userLogin, newComment, deleteComment,viewAllPosts, updateUser} from '../controllers/users.js';
 import {newAdmin,adminLogin,createPost, deletePost} from '../controllers/admin.js';
 import { authenticateToken } from '../middlewares/authmiddleware.js';
 
@@ -21,6 +21,8 @@ router.post('/comment',authenticateToken, newComment);
 router.post('/deleteComment',authenticateToken, deleteComment);
 
 router.get('/posts', viewAllPosts);
+
+router.get('/update', authenticateToken, updateUser)
 
 //admin
 

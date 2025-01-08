@@ -3,7 +3,7 @@ import {v4 as uuid4} from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import'dotenv/config';
-import { viewAllBlogPosts,checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb, insertUserCommentsIntoDb, deleteUserCommentFromDb} from '../database/database_query.js';
+import { viewAllBlogPosts,checkIfUserEmailAndUsernameExists, insertNewUserIntoDb, getUserFromDb, insertUserCommentsIntoDb, deleteUserCommentFromDb, updateUserUsernameFromDb} from '../database/database_query.js';
 const saltRounds = 10;
 import 'dotenv/config';
 
@@ -165,5 +165,15 @@ export const viewAllPosts = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     const {newUsername} = req.body;
-    if(!newUsername){return res.status(500).send("Cannot work with an empty field")};
+    const {username} = req.user;
+    if(!newUsername){return res.status(400).send("Cannot work with an empty field")};
+
+    try{
+        const result =  await updateUserUsernameFromDb(newUsername, username);
+        if(result){res.status(201).send("username updated successfully")};
+    }
+    catch(error){
+        console.error('Error updating username:',error)
+        res.status(500).send('Could not update user');
+    }
 }

@@ -22,7 +22,7 @@ router.post('/deleteComment',authenticateToken, deleteComment);
 
 router.get('/posts', viewAllPosts);
 
-router.get('/update', authenticateToken, updateUser)
+router.patch('/update', authenticateToken, updateUser)
 
 //admin
 

@@ -111,3 +111,17 @@ export function deleteUserCommentFromDb(commentId, postId, userId){
     });
 }
 
+export function updateUserUsernameFromDb(newUsername,username){
+    const updateQuery = `UPDATE users SET username = (?) WHERE username = (?);`
+
+    return new Promise((resolve,reject)=>{
+        pool.query(updateQuery,[newUsername,username],(err,results)=>{
+            if(err){
+                console.error("Error updating username", err);
+                return reject(err);
+            }
+            console.log("username updated successfully:", results);
+            resolve(results);
+        });
+    });
+}
